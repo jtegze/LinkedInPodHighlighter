@@ -50,129 +50,96 @@ function normalizeProfileUrl(url) {
   // Remove trailing slash
   cleanUrl = cleanUrl.replace(/\/$/, '');
 
-  console.log('Normalized URL:', cleanUrl);
   return cleanUrl;
-}
-
-function processPodUsers() {
-  // First check if this is a profile page URL
-  const profileUrl = window.location.href;
-  console.log('Current page URL:', profileUrl);
-
-  if (isPodUser(profileUrl)) {
-    console.log('Current profile is a pod user');
-
-    // Handle profile pages - look for the headline in multiple possible locations
-    const headlineSelectors = [
-      '.text-body-medium.break-words',
-      '.pv-text-details__left-panel .text-body-medium',
-      'div[data-generated-suggestion-target] .text-body-medium',
-      'h1.break-words + div.text-body-medium',
-      'div[data-generated-suggestion-target="urn:li:fsu_profileActionDelegate"]'
-    ];
-
-    for (const selector of headlineSelectors) {
-      const headlineElement = document.querySelector(selector);
-      if (headlineElement && !headlineElement.querySelector('.pod-user-label')) {
-        console.log('Found headline element:', headlineElement.textContent);
-        addPodUserLabel(headlineElement, 'profile');
-        break;
-      }
-    }
-  }
-
-  // Process inline post mentions and profile links
-  const postMentions = document.querySelectorAll([
-    'a[href*="/in/"].xrRzshziQfYBvuVMpfGnTyyiKZZqmaRxghNaNJtQ',
-    'a[href*="/in/"].update-components-actor__meta-link',
-    'a[href*="/in/"][data-test-app-aware-link]'
-  ].join(','));
-
-  postMentions.forEach(link => {
-    if (!link.href) return;
-
-    const profileUrl = link.href;
-    if (!isPodUser(profileUrl)) return;
-
-    // Find the name span within the link
-    const nameSpan = link.querySelector('span:not(.pod-user-label)');
-    if (nameSpan && !nameSpan.querySelector('.pod-user-label')) {
-      addPodUserLabel(nameSpan, 'feed');
-    }
-  });
-
-  // Process feed posts and search results
-  const items = document.querySelectorAll([
-    '.feed-shared-update-v2',
-    '.update-components-actor',
-    '.search-results__list-item',
-    '.ember-view[data-test-search-result]'
-  ].join(','));
-
-  items.forEach(item => {
-    const linkElement = item.querySelector('a[href*="/in/"]');
-    if (!linkElement) return;
-
-    const itemUrl = linkElement.href;
-    if (!isPodUser(itemUrl)) return;
-
-    // First try to find the headline element
-    const headlineElement = item.querySelector([
-      '.update-components-actor__description',
-      '.text-body-small.break-words',
-      '.ember-view .text-body-medium'
-    ].join(','));
-
-    if (headlineElement && !headlineElement.querySelector('.pod-user-label')) {
-      addPodUserLabel(headlineElement, 'profile');
-    }
-
-    // Also label the name if available
-    const nameElement = item.querySelector([
-      '.feed-shared-actor__name',
-      '.update-components-actor__name',
-      '.update-components-actor__title .t-bold',
-      '.ember-view .t-bold'
-    ].join(','));
-
-    if (nameElement && !nameElement.querySelector('.pod-user-label')) {
-      addPodUserLabel(nameElement, 'feed');
-    }
-  });
 }
 
 function isPodUser(url) {
   if (!url || !podUsers.length) return false;
 
   const cleanUrl = normalizeProfileUrl(url);
-
   return podUsers.some(podUrl => {
     const cleanPodUrl = normalizeProfileUrl(podUrl);
-    const match = cleanUrl.includes(cleanPodUrl);
-    console.log('Comparing URLs:', {
-      cleanUrl,
-      cleanPodUrl,
-      match
-    });
-    return match;
+    return cleanUrl.includes(cleanPodUrl);
   });
 }
 
 function addPodUserLabel(element, context = 'feed') {
-  if (!element) return;
+  if (!element || element.querySelector('.pod-user-label')) return;
 
   const label = document.createElement('span');
-  label.className = 'pod-user-label';
-  if (context === 'feed') {
-    label.className += ' pod-user-label--feed';
-  }
+  label.className = `pod-user-label${context === 'feed' ? ' pod-user-label--feed' : ''}`;
   label.textContent = 'Pod User';
 
-  if (context === 'profile') {
-    // For profiles and search results headlines, insert before the text
-    element.insertBefore(label, element.firstChild);
+  // Find the actual text node containing the name
+  const textNodes = Array.from(element.childNodes)
+    .filter(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+
+  if (textNodes.length > 0) {
+    // Insert after the first text node containing the name
+    const nameNode = textNodes[0];
+    element.insertBefore(label, nameNode.nextSibling);
   } else {
-    // For feed posts and search results names, append after
-    element.appendChild(label);
+    // Fallback: insert at the beginning
+    element.insertBefore(label, element.firstChild);
   }
+}
+
+function processPodUsers() {
+  // Handle profile pages
+  const profileUrl = window.location.href;
+  if (isPodUser(profileUrl)) {
+    const headlineSelectors = [
+      '.text-body-medium.break-words',
+      '.pv-text-details__left-panel .text-body-medium',
+      'div[data-generated-suggestion-target] .text-body-medium'
+    ];
+
+    for (const selector of headlineSelectors) {
+      const headlineElement = document.querySelector(selector);
+      if (headlineElement && !headlineElement.hasAttribute('data-pod-processed')) {
+        addPodUserLabel(headlineElement, 'profile');
+        headlineElement.setAttribute('data-pod-processed', 'true');
+        break;
+      }
+    }
+  }
+
+  // Process inline post mentions and links
+  const nameSelectors = [
+    'a[href*="/in/"].xrRzshziQfYBvuVMpfGnTyyiKZZqmaRxghNaNJtQ span:not([data-pod-processed])',
+    'a[href*="/in/"][data-test-app-aware-link] span:not([data-pod-processed])',
+    '.ember-view a[href*="/in/"] span:not([data-pod-processed])'
+  ];
+
+  document.querySelectorAll(nameSelectors.join(',')).forEach(nameSpan => {
+    const link = nameSpan.closest('a[href*="/in/"]');
+    if (!link || !link.href || !isPodUser(link.href)) return;
+
+    addPodUserLabel(nameSpan, 'feed');
+    nameSpan.setAttribute('data-pod-processed', 'true');
+  });
+
+  // Process feed posts and search results
+  const items = document.querySelectorAll([
+    '.feed-shared-update-v2:not([data-pod-processed])',
+    '.update-components-actor:not([data-pod-processed])',
+    '.search-results__list-item:not([data-pod-processed])'
+  ].join(','));
+
+  items.forEach(item => {
+    const linkElement = item.querySelector('a[href*="/in/"]');
+    if (!linkElement || !isPodUser(linkElement.href)) return;
+
+    const nameElement = item.querySelector([
+      '.feed-shared-actor__name',
+      '.update-components-actor__name',
+      '.update-components-actor__title .t-bold'
+    ].join(','));
+
+    if (nameElement && !nameElement.hasAttribute('data-pod-processed')) {
+      addPodUserLabel(nameElement, 'feed');
+      nameElement.setAttribute('data-pod-processed', 'true');
+      item.setAttribute('data-pod-processed', 'true');
+    }
+  });
 }

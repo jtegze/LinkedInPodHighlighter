@@ -13,7 +13,6 @@
   line-height: 1.5 !important;
   white-space: nowrap !important;
   z-index: 9999 !important;
-  position: relative !important;
   font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto !important;
 }
 
@@ -27,18 +26,13 @@
 .feed-shared-actor__name,
 .update-components-actor__name,
 .update-components-actor__title .t-bold,
-.text-body-medium.break-words,
-.update-components-actor__description,
 .ember-view .t-bold,
-.ember-view .text-body-medium,
-div[data-generated-suggestion-target] .text-body-medium,
 a[href*="/in/"].xrRzshziQfYBvuVMpfGnTyyiKZZqmaRxghNaNJtQ span,
 a[href*="/in/"][data-test-app-aware-link] span {
   display: inline-flex !important;
   align-items: center !important;
-  flex-wrap: wrap !important;
+  flex-wrap: nowrap !important;
   gap: 4px !important;
-  position: relative !important;
 }
 
 /* Force label visibility */

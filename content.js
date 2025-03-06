@@ -61,7 +61,7 @@ function processPodUsers() {
     }
   }
 
-  // Process feed posts
+  // Process feed posts and search results
   const feedPosts = document.querySelectorAll('.feed-shared-update-v2, .update-components-actor');
   console.log('Found feed posts:', feedPosts.length);
   feedPosts.forEach(post => {
@@ -73,10 +73,16 @@ function processPodUsers() {
         console.log('Feed post URL:', profileUrl);
         if (isPodUser(profileUrl) && !actorElement.querySelector('.pod-user-label')) {
           console.log('Feed post is from a pod user');
-          const nameElement = actorElement.querySelector('.feed-shared-actor__name, .update-components-actor__name');
-          if (nameElement) {
-            console.log('Adding pod user label to feed post');
-            addPodUserLabel(nameElement, 'feed');
+          const headlineElement = actorElement.querySelector('.update-components-actor__description');
+          if (headlineElement) {
+            console.log('Adding pod user label to search result headline');
+            addPodUserLabel(headlineElement, 'profile');
+          } else {
+            const nameElement = actorElement.querySelector('.feed-shared-actor__name, .update-components-actor__name, .update-components-actor__title .t-bold');
+            if (nameElement) {
+              console.log('Adding pod user label to feed post');
+              addPodUserLabel(nameElement, 'feed');
+            }
           }
         }
       }
@@ -99,6 +105,12 @@ function addPodUserLabel(element, context = 'feed') {
     label.className += ' pod-user-label--feed';
   }
   label.textContent = 'Pod User';
-  element.appendChild(label);
+  if (context === 'profile') {
+    // For profiles and search results, insert before the text
+    element.insertBefore(label, element.firstChild);
+  } else {
+    // For feed posts, append after the name
+    element.appendChild(label);
+  }
   console.log('Added pod user label:', context, 'context');
 }

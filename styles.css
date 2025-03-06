@@ -1,45 +1,52 @@
+/* Pod user label base styles */
 .pod-user-label {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 2px 8px;
-  background-color: #dc3545;
-  color: white;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: normal;
-  vertical-align: middle;
-  line-height: 1.5;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 8px !important;
+  padding: 2px 8px !important;
+  background-color: #dc3545 !important;
+  color: white !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  font-weight: normal !important;
+  line-height: 1.5 !important;
+  white-space: nowrap !important;
+  z-index: 9999 !important;
+  position: relative !important;
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto !important;
 }
 
-/* Specific styling for feed posts */
+/* Feed posts specific styling */
 .pod-user-label--feed {
-  position: relative;
-  margin-left: 4px;
-  font-size: 11px;
-  top: -1px;
+  font-size: 11px !important;
+  margin: 0 4px !important;
 }
 
-/* Ensure the label doesn't wrap to the next line */
-.feed-shared-actor__name, 
+/* Container styling */
+.feed-shared-actor__name,
 .update-components-actor__name,
 .update-components-actor__title .t-bold,
 .text-body-medium.break-words,
-.update-components-actor__description {
+.update-components-actor__description,
+.ember-view .t-bold,
+.ember-view .text-body-medium {
   display: inline-flex !important;
   align-items: center !important;
-  flex-wrap: nowrap !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+  position: relative !important;
 }
 
-/* Override any LinkedIn styles that might interfere */
+/* Force label visibility */
 .pod-user-label {
-  z-index: 1;
-  pointer-events: none;
-  white-space: nowrap;
-  margin-right: 4px;  /* Add spacing after the label */
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: none !important;
 }
 
-/* Additional fixes for search results */
-.update-components-actor__description {
-  position: relative;
-  display: inline-flex !important;
+/* Ensure LinkedIn styles don't override */
+.pod-user-label::before,
+.pod-user-label::after {
+  display: none !important;
 }

@@ -51,6 +51,7 @@ async function updatePodUsersList() {
       .filter(url => url.length > 0);
 
     console.log('Retrieved', urls.length, 'pod user URLs');
+    console.log('Sample URLs:', urls.slice(0, 3));
 
     // Store URLs and timestamp
     await chrome.storage.local.set({
@@ -58,6 +59,10 @@ async function updatePodUsersList() {
       lastUpdate: Date.now()
     });
     console.log('Stored pod users list in local storage');
+
+    // Verify storage
+    const stored = await chrome.storage.local.get(['podUsers']);
+    console.log('Verified storage - found', stored.podUsers.length, 'URLs');
 
     // Notify content scripts of update
     const tabs = await chrome.tabs.query({url: '*://*.linkedin.com/*'});

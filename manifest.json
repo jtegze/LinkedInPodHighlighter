@@ -8,14 +8,15 @@
     "alarms"
   ],
   "host_permissions": [
-    "https://jantegze.b-cdn.net/*"
+    "https://jantegze.b-cdn.net/*",
+    "https://*.linkedin.com/*"
   ],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["*://*.linkedin.com/*"],
+      "matches": ["https://*.linkedin.com/*"],
       "js": ["content.js"],
       "css": ["styles.css"]
     }

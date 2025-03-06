@@ -22,7 +22,8 @@
 /* Ensure the label doesn't wrap to the next line */
 .feed-shared-actor__name, 
 .update-components-actor__name,
-.pv-top-card h1 {
+.pv-top-card h1,
+.text-body-medium.break-words {
   display: inline-flex !important;
   align-items: center !important;
   flex-wrap: nowrap !important;

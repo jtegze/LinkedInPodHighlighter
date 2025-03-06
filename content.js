@@ -53,10 +53,10 @@ function processPodUsers() {
     console.log('Profile URL:', profileUrl);
     if (isPodUser(profileUrl)) {
       console.log('Profile is a pod user');
-      const nameElement = profileSection.querySelector('h1');
-      if (nameElement && !nameElement.querySelector('.pod-user-label')) {
-        console.log('Adding pod user label to profile name');
-        addPodUserLabel(nameElement, 'profile');
+      const headlineElement = profileSection.querySelector('.text-body-medium.break-words');
+      if (headlineElement && !headlineElement.querySelector('.pod-user-label')) {
+        console.log('Adding pod user label to profile headline');
+        addPodUserLabel(headlineElement, 'profile');
       }
     }
   }

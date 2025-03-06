@@ -1,0 +1,89 @@
+<div class="mt2 relative">
+      <div class="yacsRZYFkLWMRFJiUsPUhKTvhgWAHlvdGtVE
+          ">
+        <div class="vrxqZKKqegNMspnhzUNiDrNhcHbFojwBdeYo">
+          <span tabindex="-1" id="ember50" class="artdeco-hoverable-trigger artdeco-hoverable-trigger--content-placed-bottom artdeco-hoverable-trigger--is-hoverable ember-view">
+            <a href="/in/ruben-hassid/overlay/about-this-profile/" id="ember51" class="ember-view mcgcJigojKkTkQrHUPEKaNJiDIhQOClkA" aria-label="Ruben Hassid" aria-describedby="artdeco-hoverable-artdeco-gen-42">
+              <h1 class="XeeWccSQMqJSGzaLGFVUqOrSuaZSYofHxUE
+                  inline t-24 v-align-middle break-words">Ruben Hassid</h1>
+                <svg role="none" aria-hidden="true" class="pv-text-details__verified-badge-icon v-align-middle" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" data-supported-dps="24x24" data-test-icon="verified-medium">
+<!---->    
+    <use href="#verified-medium" width="24" height="24"></use>
+</svg>
+
+<!----><!---->            </a>
+            <div id="artdeco-gen-42" class="ember-view"><div id="ember53" class="ember-view"></div></div>
+          </span>
+<!----><!----><!---->            
+    <span class="distance-badge t-black--light t-14
+        
+        t-black--light
+        
+         aERIyuSnvIUMFVPTSWGthrdPadGxrhuYVbis
+                text-body-small v-align-middle">
+      <span class="visually-hidden">
+          2nd degree connection
+      </span>
+      <span class="dist-value " aria-hidden="true">
+        2nd
+      </span>
+    </span>
+  
+        </div>
+<!---->        <div class="text-body-medium break-words" data-generated-suggestion-target="urn:li:fsu_profileActionDelegate:1413075010">
+          Master AI before it masters you.
+        </div>
+<!----><!----><!---->      </div>
+        <ul class="hLeQxMjwEFOhaAxhQwmihRMPdXEriVnvqSg">
+            <li class="hpAEZngPQGwtKtDItwQCSMEudcKBmMik">
+              <button class="PZtiiYCDYCfgadfTupOaJAtOBSsZcSDmkEbA text-align-left" aria-label="Current company: EasyGen. Click to skip to experience card" type="button">
+                <img src="https://media.licdn.com/dms/image/v2/D4D0BAQFIUN42a2GFVA/company-logo_100_100/company-logo_100_100/0/1737363689589/easygen_logo?e=1749081600&amp;v=beta&amp;t=dnv10w8OuW_2ApVHyzy2O3f6PYAwO9jL2QdMeuWHDBc" alt="" id="ember79" class="evi-image ember-view VUBbmaxgZCtDqRcldnsRvrlRlFQcfgLbPrbcU EntityPhoto-square-1">
+                <span class="kybIUSEdSMgWTiLBMxqsXHayhTYIHjUQGsuTt hoverable-link-text break-words text-body-small t-black">
+                  
+    <div class="XWQQUocwHZvwygkfFpaaSaGYtdPDLvBLuA
+        inline-show-more-text--is-collapsed
+        inline-show-more-text--is-collapsed-with-line-clamp
+        
+        
+        
+        " style="-webkit-line-clamp:2;" dir="ltr" tabindex="-1">
+
+        EasyGen
+      
+<!---->    </div>
+  
+                </span>
+              </button>
+            </li>
+            <li class="hpAEZngPQGwtKtDItwQCSMEudcKBmMik">
+              <button class="PZtiiYCDYCfgadfTupOaJAtOBSsZcSDmkEbA text-align-left" aria-label="Education: 성균관대학교. Click to skip to education card" type="button">
+                <img src="https://media.licdn.com/dms/image/v2/C510BAQH9AIgSW2OIGA/company-logo_100_100/company-logo_100_100/0/1631378079166?e=1749081600&amp;v=beta&amp;t=UuB-1HNQPQJcLyn1Dz0wksmZ_jt-FJK8mhYmfZZI03E" alt="" id="ember80" class="evi-image ember-view VUBbmaxgZCtDqRcldnsRvrlRlFQcfgLbPrbcU EntityPhoto-square-1">
+                <span class="kybIUSEdSMgWTiLBMxqsXHayhTYIHjUQGsuTt hoverable-link-text break-words text-body-small t-black">
+                  
+    <div class="XWQQUocwHZvwygkfFpaaSaGYtdPDLvBLuA
+        inline-show-more-text--is-collapsed
+        inline-show-more-text--is-collapsed-with-line-clamp
+        
+        
+        
+        " style="-webkit-line-clamp:2;" dir="ltr" tabindex="-1">
+
+        성균관대학교
+      
+<!---->    </div>
+  
+                </span>
+              </button>
+            </li>
+        </ul>
+      <div class="yacsRZYFkLWMRFJiUsPUhKTvhgWAHlvdGtVE mt2">
+<!---->        <span class="text-body-small inline t-black--light break-words">
+          Tel Aviv-Yafo, Tel Aviv District, Israel
+        </span>
+          <span class="aERIyuSnvIUMFVPTSWGthrdPadGxrhuYVbis t-black--light">
+            <a href="/in/ruben-hassid/overlay/contact-info/" id="top-card-text-details-contact-info" class="ember-view link-without-visited-state cursor-pointer text-heading-small inline-block break-words">
+              Contact info
+            </a>
+          </span>
+      </div>
+    </div>

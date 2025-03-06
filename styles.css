@@ -31,7 +31,9 @@
 .update-components-actor__description,
 .ember-view .t-bold,
 .ember-view .text-body-medium,
-div[data-generated-suggestion-target] .text-body-medium {
+div[data-generated-suggestion-target] .text-body-medium,
+a[href*="/in/"].xrRzshziQfYBvuVMpfGnTyyiKZZqmaRxghNaNJtQ span,
+a[href*="/in/"][data-test-app-aware-link] span {
   display: inline-flex !important;
   align-items: center !important;
   flex-wrap: wrap !important;

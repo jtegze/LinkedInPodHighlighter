@@ -45,7 +45,7 @@ function normalizeProfileUrl(url) {
   let cleanUrl = url.toLowerCase().split('?')[0].split('#')[0];
 
   // Remove overlay segments (e.g., /overlay/about-this-profile/)
-  cleanUrl = cleanUrl.replace(/\/overlay\/[^/]+\/?/, '/');
+  cleanUrl = cleanUrl.replace(/\/overlay\/.*$/, '');
 
   // Remove trailing slash
   cleanUrl = cleanUrl.replace(/\/$/, '');
@@ -80,6 +80,26 @@ function processPodUsers() {
       }
     }
   }
+
+  // Process inline post mentions and profile links
+  const postMentions = document.querySelectorAll([
+    'a[href*="/in/"].xrRzshziQfYBvuVMpfGnTyyiKZZqmaRxghNaNJtQ',
+    'a[href*="/in/"].update-components-actor__meta-link',
+    'a[href*="/in/"][data-test-app-aware-link]'
+  ].join(','));
+
+  postMentions.forEach(link => {
+    if (!link.href) return;
+
+    const profileUrl = link.href;
+    if (!isPodUser(profileUrl)) return;
+
+    // Find the name span within the link
+    const nameSpan = link.querySelector('span:not(.pod-user-label)');
+    if (nameSpan && !nameSpan.querySelector('.pod-user-label')) {
+      addPodUserLabel(nameSpan, 'feed');
+    }
+  });
 
   // Process feed posts and search results
   const items = document.querySelectorAll([

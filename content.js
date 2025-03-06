@@ -65,7 +65,7 @@ function isPodUser(url) {
 }
 
 function addPodUserLabel(element) {
-  // Skip if element or its ancestors already have a label
+  // Skip if element or any ancestor already has a label
   let parent = element;
   while (parent) {
     if (parent.querySelector('.pod-user-label')) {
@@ -78,13 +78,30 @@ function addPodUserLabel(element) {
   label.className = 'pod-user-label pod-user-label--feed';
   label.textContent = 'Pod User';
 
-  // Find the actual text node containing the name
-  const textNodes = Array.from(element.childNodes)
-    .filter(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+  // Find the actual name text node
+  const walker = document.createTreeWalker(
+    element,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: function(node) {
+        const parentElement = node.parentElement;
+        // Only accept text nodes that are directly inside the target element
+        // and not inside any child elements
+        return (parentElement === element && node.textContent.trim()) 
+          ? NodeFilter.FILTER_ACCEPT 
+          : NodeFilter.FILTER_REJECT;
+      }
+    }
+  );
 
-  if (textNodes.length > 0) {
-    // Insert after the first text node containing the name
-    element.insertBefore(label, textNodes[0].nextSibling);
+  let nameNode = null;
+  while (walker.nextNode()) {
+    nameNode = walker.currentNode;
+    break; // Take only the first valid text node
+  }
+
+  if (nameNode) {
+    element.insertBefore(label, nameNode.nextSibling);
     element.setAttribute('data-pod-processed', 'true');
   }
 }
@@ -100,30 +117,37 @@ function processPodUsers() {
       }
     }
 
-    // Process feed posts and search results
-    document.querySelectorAll('a[href*="/in/"]:not([data-pod-processed])').forEach(link => {
+    // Process names in feed and search results
+    const nameLinks = document.querySelectorAll([
+      // Search results and profile links
+      '.feed-shared-actor__name:not([data-pod-processed])',
+      '.update-components-actor__name:not([data-pod-processed])',
+      '.update-components-actor__title span.t-bold:not([data-pod-processed])',
+      // Post mentions
+      'a[href*="/in/"] span.ember-view:not([data-pod-processed])'
+    ].join(','));
+
+    nameLinks.forEach(nameElement => {
       try {
-        if (!isPodUser(link.href)) return;
-
-        // Find the innermost span that contains only the name text
-        const nameSpan = link.querySelector('span:not(.pod-user-label)');
-        if (nameSpan && !nameSpan.closest('[data-pod-processed]')) {
-          // Skip if this is part of an avatar container
-          if (
-            nameSpan.classList.contains('update-components-actor__avatar-image') ||
-            nameSpan.closest('.update-components-actor__avatar') ||
-            nameSpan.querySelector('img')
-          ) {
-            return;
-          }
-
-          addPodUserLabel(nameSpan);
+        // Skip if this is an avatar or part of one
+        if (
+          nameElement.classList.contains('update-components-actor__avatar-image') ||
+          nameElement.closest('.update-components-actor__avatar') ||
+          nameElement.querySelector('img')
+        ) {
+          return;
         }
+
+        // Find the associated profile link
+        const link = nameElement.closest('a[href*="/in/"]');
+        if (!link || !isPodUser(link.href)) return;
+
+        // Add label only to the innermost text container
+        addPodUserLabel(nameElement);
       } catch (error) {
-        console.log('Error processing link:', error);
+        console.log('Error processing name element:', error);
       }
     });
-
   } catch (error) {
     console.log('Error in processPodUsers:', error);
   }

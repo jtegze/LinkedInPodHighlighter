@@ -1,9 +1,7 @@
 /* Pod user label base styles */
 .pod-user-label {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  margin: 0 8px !important;
+  display: inline !important;
+  margin: 0 4px !important;
   padding: 2px 8px !important;
   background-color: #dc3545 !important;
   color: white !important;
@@ -12,14 +10,14 @@
   font-weight: normal !important;
   line-height: 1.5 !important;
   white-space: nowrap !important;
-  z-index: 9999 !important;
+  vertical-align: middle !important;
   font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto !important;
 }
 
 /* Feed posts specific styling */
 .pod-user-label--feed {
   font-size: 11px !important;
-  margin: 0 4px !important;
+  margin-left: 4px !important;
 }
 
 /* Remove any inherited styles that might affect positioning */
@@ -28,24 +26,16 @@
   display: none !important;
 }
 
+/* Container styling for feed and search results */
+.feed-shared-actor__name,
+.update-components-actor__name,
+.update-components-actor__title span.t-bold {
+  display: inline !important;
+}
+
 /* Profile page header adjustments */
 .text-body-medium.break-words {
-  padding-right: 8px !important;
-}
-
-/* Container styling for feed and search results */
-.feed-shared-actor__title,
-.update-components-actor__title,
-.search-results__title {
   display: inline-flex !important;
   align-items: center !important;
-  flex-wrap: wrap !important;
   gap: 4px !important;
-}
-
-/* Ensure label visibility */
-.pod-user-label {
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: none !important;
 }

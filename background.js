@@ -36,6 +36,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
+// Function to safely send message to a tab
+async function sendMessageToTab(tabId, message) {
+  try {
+    await chrome.tabs.sendMessage(tabId, message);
+    return true;
+  } catch (error) {
+    console.log(`Failed to send message to tab ${tabId}:`, error.message);
+    return false;
+  }
+}
+
 // Function to update pod users list
 async function updatePodUsersList() {
   try {
@@ -51,7 +62,6 @@ async function updatePodUsersList() {
       .filter(url => url.length > 0);
 
     console.log('Retrieved', urls.length, 'pod user URLs');
-    console.log('Sample URLs:', urls.slice(0, 3));
 
     // Store URLs and timestamp
     await chrome.storage.local.set({
@@ -65,11 +75,26 @@ async function updatePodUsersList() {
     console.log('Verified storage - found', stored.podUsers.length, 'URLs');
 
     // Notify content scripts of update
-    const tabs = await chrome.tabs.query({url: '*://*.linkedin.com/*'});
-    console.log('Notifying', tabs.length, 'LinkedIn tabs of update');
-    tabs.forEach(tab => {
-      chrome.tabs.sendMessage(tab.id, { action: 'refreshPodUsers' });
-    });
+    try {
+      const tabs = await chrome.tabs.query({
+        url: [
+          '*://*.linkedin.com/*',
+          '*://linkedin.com/*'
+        ]
+      });
+      console.log('Found', tabs.length, 'LinkedIn tabs to notify');
+
+      // Use Promise.allSettled to handle both successful and failed notifications
+      const results = await Promise.allSettled(
+        tabs.map(tab => sendMessageToTab(tab.id, { action: 'refreshPodUsers' }))
+      );
+
+      const succeeded = results.filter(r => r.status === 'fulfilled' && r.value).length;
+      console.log(`Successfully notified ${succeeded} of ${tabs.length} tabs`);
+    } catch (error) {
+      console.log('Error while querying tabs:', error.message);
+      // Don't throw error since the main update was successful
+    }
 
     return true;
   } catch (error) {

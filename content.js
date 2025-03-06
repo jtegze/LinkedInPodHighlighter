@@ -16,10 +16,20 @@ chrome.storage.local.get(['podUsers'], (result) => {
 // Listen for updates from background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'refreshPodUsers') {
+    console.log('Received refresh request from background');
     chrome.storage.local.get(['podUsers'], (result) => {
-      podUsers = result.podUsers || [];
-      processPodUsers();
+      if (result.podUsers) {
+        console.log('Refreshing pod users list with', result.podUsers.length, 'entries');
+        podUsers = result.podUsers;
+        processPodUsers();
+        // Acknowledge receipt of the update
+        sendResponse({ success: true });
+      } else {
+        console.log('No pod users found in storage after refresh request');
+        sendResponse({ success: false, error: 'No pod users data found' });
+      }
     });
+    return true; // Required for async response
   }
 });
 
@@ -85,61 +95,73 @@ function addPodUserLabel(element, context = 'feed') {
 }
 
 function processPodUsers() {
-  // Handle profile pages
-  const profileUrl = window.location.href;
-  if (isPodUser(profileUrl)) {
-    const headlineSelectors = [
-      '.text-body-medium.break-words',
-      '.pv-text-details__left-panel .text-body-medium',
-      'div[data-generated-suggestion-target] .text-body-medium'
-    ];
+  try {
+    // Handle profile pages
+    const profileUrl = window.location.href;
+    if (isPodUser(profileUrl)) {
+      const headlineSelectors = [
+        '.text-body-medium.break-words',
+        '.pv-text-details__left-panel .text-body-medium',
+        'div[data-generated-suggestion-target] .text-body-medium'
+      ];
 
-    for (const selector of headlineSelectors) {
-      const headlineElement = document.querySelector(selector);
-      if (headlineElement && !headlineElement.hasAttribute('data-pod-processed')) {
-        addPodUserLabel(headlineElement, 'profile');
-        headlineElement.setAttribute('data-pod-processed', 'true');
-        break;
+      for (const selector of headlineSelectors) {
+        const headlineElement = document.querySelector(selector);
+        if (headlineElement && !headlineElement.hasAttribute('data-pod-processed')) {
+          addPodUserLabel(headlineElement, 'profile');
+          headlineElement.setAttribute('data-pod-processed', 'true');
+          break;
+        }
       }
     }
-  }
 
-  // Process inline post mentions and links
-  const nameSelectors = [
-    'a[href*="/in/"].xrRzshziQfYBvuVMpfGnTyyiKZZqmaRxghNaNJtQ span:not([data-pod-processed])',
-    'a[href*="/in/"][data-test-app-aware-link] span:not([data-pod-processed])',
-    '.ember-view a[href*="/in/"] span:not([data-pod-processed])'
-  ];
+    // Process inline post mentions and links
+    const nameSelectors = [
+      'a[href*="/in/"].xrRzshziQfYBvuVMpfGnTyyiKZZqmaRxghNaNJtQ span:not([data-pod-processed])',
+      'a[href*="/in/"][data-test-app-aware-link] span:not([data-pod-processed])',
+      '.ember-view a[href*="/in/"] span:not([data-pod-processed])'
+    ];
 
-  document.querySelectorAll(nameSelectors.join(',')).forEach(nameSpan => {
-    const link = nameSpan.closest('a[href*="/in/"]');
-    if (!link || !link.href || !isPodUser(link.href)) return;
+    document.querySelectorAll(nameSelectors.join(',')).forEach(nameSpan => {
+      try {
+        const link = nameSpan.closest('a[href*="/in/"]');
+        if (!link || !link.href || !isPodUser(link.href)) return;
 
-    addPodUserLabel(nameSpan, 'feed');
-    nameSpan.setAttribute('data-pod-processed', 'true');
-  });
+        addPodUserLabel(nameSpan, 'feed');
+        nameSpan.setAttribute('data-pod-processed', 'true');
+      } catch (error) {
+        console.log('Error processing name span:', error);
+      }
+    });
 
-  // Process feed posts and search results
-  const items = document.querySelectorAll([
-    '.feed-shared-update-v2:not([data-pod-processed])',
-    '.update-components-actor:not([data-pod-processed])',
-    '.search-results__list-item:not([data-pod-processed])'
-  ].join(','));
-
-  items.forEach(item => {
-    const linkElement = item.querySelector('a[href*="/in/"]');
-    if (!linkElement || !isPodUser(linkElement.href)) return;
-
-    const nameElement = item.querySelector([
-      '.feed-shared-actor__name',
-      '.update-components-actor__name',
-      '.update-components-actor__title .t-bold'
+    // Process feed posts and search results
+    const items = document.querySelectorAll([
+      '.feed-shared-update-v2:not([data-pod-processed])',
+      '.update-components-actor:not([data-pod-processed])',
+      '.search-results__list-item:not([data-pod-processed])'
     ].join(','));
 
-    if (nameElement && !nameElement.hasAttribute('data-pod-processed')) {
-      addPodUserLabel(nameElement, 'feed');
-      nameElement.setAttribute('data-pod-processed', 'true');
-      item.setAttribute('data-pod-processed', 'true');
-    }
-  });
+    items.forEach(item => {
+      try {
+        const linkElement = item.querySelector('a[href*="/in/"]');
+        if (!linkElement || !isPodUser(linkElement.href)) return;
+
+        const nameElement = item.querySelector([
+          '.feed-shared-actor__name',
+          '.update-components-actor__name',
+          '.update-components-actor__title .t-bold'
+        ].join(','));
+
+        if (nameElement && !nameElement.hasAttribute('data-pod-processed')) {
+          addPodUserLabel(nameElement, 'feed');
+          nameElement.setAttribute('data-pod-processed', 'true');
+          item.setAttribute('data-pod-processed', 'true');
+        }
+      } catch (error) {
+        console.log('Error processing feed item:', error);
+      }
+    });
+  } catch (error) {
+    console.log('Error in processPodUsers:', error);
+  }
 }

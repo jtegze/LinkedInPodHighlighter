@@ -117,13 +117,23 @@ function processPodUsers() {
 
     // Process inline post mentions and links
     const nameSelectors = [
-      'a[href*="/in/"].xrRzshziQfYBvuVMpfGnTyyiKZZqmaRxghNaNJtQ span:not([data-pod-processed])',
-      'a[href*="/in/"][data-test-app-aware-link] span:not([data-pod-processed])',
-      '.ember-view a[href*="/in/"] span:not([data-pod-processed])'
-    ];
+      'a[href*="/in/"].xrRzshziQfYBvuVMpfGnTyyiKZZqmaRxghNaNJtQ span:not([data-pod-processed]):not(.update-components-actor__avatar-image):not(.js-update-components-actor__avatar)',
+      'a[href*="/in/"][data-test-app-aware-link] span:not([data-pod-processed]):not(.update-components-actor__avatar-image):not(.js-update-components-actor__avatar)',
+      '.ember-view a[href*="/in/"] span:not([data-pod-processed]):not(.update-components-actor__avatar-image):not(.js-update-components-actor__avatar)'
+    ].join(',');
 
-    document.querySelectorAll(nameSelectors.join(',')).forEach(nameSpan => {
+    document.querySelectorAll(nameSelectors).forEach(nameSpan => {
       try {
+        // Skip if this is an avatar container or image
+        if (
+          nameSpan.classList.contains('js-update-components-actor__avatar') ||
+          nameSpan.classList.contains('update-components-actor__avatar-image') ||
+          nameSpan.closest('.update-components-actor__avatar') ||
+          nameSpan.querySelector('img')
+        ) {
+          return;
+        }
+
         const link = nameSpan.closest('a[href*="/in/"]');
         if (!link || !link.href || !isPodUser(link.href)) return;
 
@@ -149,10 +159,20 @@ function processPodUsers() {
         const nameElement = item.querySelector([
           '.feed-shared-actor__name',
           '.update-components-actor__name',
-          '.update-components-actor__title .t-bold'
+          '.update-components-actor__title .t-bold:not(.update-components-actor__avatar-image):not(.js-update-components-actor__avatar)'
         ].join(','));
 
         if (nameElement && !nameElement.hasAttribute('data-pod-processed')) {
+          // Skip if this is an avatar container
+          if (
+            nameElement.classList.contains('js-update-components-actor__avatar') ||
+            nameElement.classList.contains('update-components-actor__avatar-image') ||
+            nameElement.closest('.update-components-actor__avatar') ||
+            nameElement.querySelector('img')
+          ) {
+            return;
+          }
+
           addPodUserLabel(nameElement, 'feed');
           nameElement.setAttribute('data-pod-processed', 'true');
           item.setAttribute('data-pod-processed', 'true');

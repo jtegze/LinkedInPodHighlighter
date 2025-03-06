@@ -22,33 +22,30 @@
   margin: 0 4px !important;
 }
 
-/* Container styling */
-.feed-shared-actor__name,
-.update-components-actor__name,
-.update-components-actor__title .t-bold,
-.ember-view .t-bold,
-a[href*="/in/"].xrRzshziQfYBvuVMpfGnTyyiKZZqmaRxghNaNJtQ span,
-a[href*="/in/"][data-test-app-aware-link] span {
-  display: inline-flex !important;
-  align-items: center !important;
-  flex-wrap: nowrap !important;
-  gap: 4px !important;
-}
-
-/* Force label visibility */
-.pod-user-label {
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: none !important;
-}
-
-/* Ensure LinkedIn styles don't override */
+/* Remove any inherited styles that might affect positioning */
 .pod-user-label::before,
 .pod-user-label::after {
   display: none !important;
 }
 
-/* Profile page specific adjustments */
+/* Profile page header adjustments */
 .text-body-medium.break-words {
   padding-right: 8px !important;
+}
+
+/* Container styling for feed and search results */
+.feed-shared-actor__title,
+.update-components-actor__title,
+.search-results__title {
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+}
+
+/* Ensure label visibility */
+.pod-user-label {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: none !important;
 }

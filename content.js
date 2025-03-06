@@ -22,7 +22,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         console.log('Refreshing pod users list with', result.podUsers.length, 'entries');
         podUsers = result.podUsers;
         processPodUsers();
-        // Acknowledge receipt of the update
         sendResponse({ success: true });
       } else {
         console.log('No pod users found in storage after refresh request');
@@ -50,22 +49,14 @@ observer.observe(document.body, {
 
 function normalizeProfileUrl(url) {
   if (!url) return '';
-
-  // Convert to lowercase and remove query parameters and hash
   let cleanUrl = url.toLowerCase().split('?')[0].split('#')[0];
-
-  // Remove overlay segments (e.g., /overlay/about-this-profile/)
   cleanUrl = cleanUrl.replace(/\/overlay\/.*$/, '');
-
-  // Remove trailing slash
   cleanUrl = cleanUrl.replace(/\/$/, '');
-
   return cleanUrl;
 }
 
 function isPodUser(url) {
   if (!url || !podUsers.length) return false;
-
   const cleanUrl = normalizeProfileUrl(url);
   return podUsers.some(podUrl => {
     const cleanPodUrl = normalizeProfileUrl(podUrl);
@@ -73,11 +64,18 @@ function isPodUser(url) {
   });
 }
 
-function addPodUserLabel(element, context = 'feed') {
-  if (!element || element.querySelector('.pod-user-label')) return;
+function addPodUserLabel(element) {
+  // Skip if element or its ancestors already have a label
+  let parent = element;
+  while (parent) {
+    if (parent.querySelector('.pod-user-label')) {
+      return;
+    }
+    parent = parent.parentElement;
+  }
 
   const label = document.createElement('span');
-  label.className = `pod-user-label${context === 'feed' ? ' pod-user-label--feed' : ''}`;
+  label.className = 'pod-user-label pod-user-label--feed';
   label.textContent = 'Pod User';
 
   // Find the actual text node containing the name
@@ -86,11 +84,8 @@ function addPodUserLabel(element, context = 'feed') {
 
   if (textNodes.length > 0) {
     // Insert after the first text node containing the name
-    const nameNode = textNodes[0];
-    element.insertBefore(label, nameNode.nextSibling);
-  } else {
-    // Fallback: insert at the beginning
-    element.insertBefore(label, element.firstChild);
+    element.insertBefore(label, textNodes[0].nextSibling);
+    element.setAttribute('data-pod-processed', 'true');
   }
 }
 
@@ -99,88 +94,36 @@ function processPodUsers() {
     // Handle profile pages
     const profileUrl = window.location.href;
     if (isPodUser(profileUrl)) {
-      const headlineSelectors = [
-        '.text-body-medium.break-words',
-        '.pv-text-details__left-panel .text-body-medium',
-        'div[data-generated-suggestion-target] .text-body-medium'
-      ];
-
-      for (const selector of headlineSelectors) {
-        const headlineElement = document.querySelector(selector);
-        if (headlineElement && !headlineElement.hasAttribute('data-pod-processed')) {
-          addPodUserLabel(headlineElement, 'profile');
-          headlineElement.setAttribute('data-pod-processed', 'true');
-          break;
-        }
+      const headlineElement = document.querySelector('.text-body-medium.break-words');
+      if (headlineElement && !headlineElement.closest('[data-pod-processed]')) {
+        addPodUserLabel(headlineElement);
       }
     }
 
-    // Process inline post mentions and links
-    const nameSelectors = [
-      'a[href*="/in/"].xrRzshziQfYBvuVMpfGnTyyiKZZqmaRxghNaNJtQ span:not([data-pod-processed]):not(.update-components-actor__avatar-image):not(.js-update-components-actor__avatar)',
-      'a[href*="/in/"][data-test-app-aware-link] span:not([data-pod-processed]):not(.update-components-actor__avatar-image):not(.js-update-components-actor__avatar)',
-      '.ember-view a[href*="/in/"] span:not([data-pod-processed]):not(.update-components-actor__avatar-image):not(.js-update-components-actor__avatar)'
-    ].join(',');
-
-    document.querySelectorAll(nameSelectors).forEach(nameSpan => {
-      try {
-        // Skip if this is an avatar container or image
-        if (
-          nameSpan.classList.contains('js-update-components-actor__avatar') ||
-          nameSpan.classList.contains('update-components-actor__avatar-image') ||
-          nameSpan.closest('.update-components-actor__avatar') ||
-          nameSpan.querySelector('img')
-        ) {
-          return;
-        }
-
-        const link = nameSpan.closest('a[href*="/in/"]');
-        if (!link || !link.href || !isPodUser(link.href)) return;
-
-        addPodUserLabel(nameSpan, 'feed');
-        nameSpan.setAttribute('data-pod-processed', 'true');
-      } catch (error) {
-        console.log('Error processing name span:', error);
-      }
-    });
-
     // Process feed posts and search results
-    const items = document.querySelectorAll([
-      '.feed-shared-update-v2:not([data-pod-processed])',
-      '.update-components-actor:not([data-pod-processed])',
-      '.search-results__list-item:not([data-pod-processed])'
-    ].join(','));
-
-    items.forEach(item => {
+    document.querySelectorAll('a[href*="/in/"]:not([data-pod-processed])').forEach(link => {
       try {
-        const linkElement = item.querySelector('a[href*="/in/"]');
-        if (!linkElement || !isPodUser(linkElement.href)) return;
+        if (!isPodUser(link.href)) return;
 
-        const nameElement = item.querySelector([
-          '.feed-shared-actor__name',
-          '.update-components-actor__name',
-          '.update-components-actor__title .t-bold:not(.update-components-actor__avatar-image):not(.js-update-components-actor__avatar)'
-        ].join(','));
-
-        if (nameElement && !nameElement.hasAttribute('data-pod-processed')) {
-          // Skip if this is an avatar container
+        // Find the innermost span that contains only the name text
+        const nameSpan = link.querySelector('span:not(.pod-user-label)');
+        if (nameSpan && !nameSpan.closest('[data-pod-processed]')) {
+          // Skip if this is part of an avatar container
           if (
-            nameElement.classList.contains('js-update-components-actor__avatar') ||
-            nameElement.classList.contains('update-components-actor__avatar-image') ||
-            nameElement.closest('.update-components-actor__avatar') ||
-            nameElement.querySelector('img')
+            nameSpan.classList.contains('update-components-actor__avatar-image') ||
+            nameSpan.closest('.update-components-actor__avatar') ||
+            nameSpan.querySelector('img')
           ) {
             return;
           }
 
-          addPodUserLabel(nameElement, 'feed');
-          nameElement.setAttribute('data-pod-processed', 'true');
-          item.setAttribute('data-pod-processed', 'true');
+          addPodUserLabel(nameSpan);
         }
       } catch (error) {
-        console.log('Error processing feed item:', error);
+        console.log('Error processing link:', error);
       }
     });
+
   } catch (error) {
     console.log('Error in processPodUsers:', error);
   }

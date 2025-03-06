@@ -38,15 +38,45 @@ observer.observe(document.body, {
   subtree: true
 });
 
+function normalizeProfileUrl(url) {
+  if (!url) return '';
+
+  // Convert to lowercase and remove query parameters and hash
+  let cleanUrl = url.toLowerCase().split('?')[0].split('#')[0];
+
+  // Remove overlay segments (e.g., /overlay/about-this-profile/)
+  cleanUrl = cleanUrl.replace(/\/overlay\/[^/]+\/?/, '/');
+
+  // Remove trailing slash
+  cleanUrl = cleanUrl.replace(/\/$/, '');
+
+  console.log('Normalized URL:', cleanUrl);
+  return cleanUrl;
+}
+
 function processPodUsers() {
-  // Process profile pages
-  const profileSection = document.querySelector('.pv-top-card');
-  if (profileSection) {
-    const profileUrl = window.location.href.split('?')[0].toLowerCase();
-    if (isPodUser(profileUrl)) {
-      const headlineElement = profileSection.querySelector('.text-body-medium.break-words');
+  // First check if this is a profile page URL
+  const profileUrl = window.location.href;
+  console.log('Current page URL:', profileUrl);
+
+  if (isPodUser(profileUrl)) {
+    console.log('Current profile is a pod user');
+
+    // Handle profile pages - look for the headline in multiple possible locations
+    const headlineSelectors = [
+      '.text-body-medium.break-words',
+      '.pv-text-details__left-panel .text-body-medium',
+      'div[data-generated-suggestion-target] .text-body-medium',
+      'h1.break-words + div.text-body-medium',
+      'div[data-generated-suggestion-target="urn:li:fsu_profileActionDelegate"]'
+    ];
+
+    for (const selector of headlineSelectors) {
+      const headlineElement = document.querySelector(selector);
       if (headlineElement && !headlineElement.querySelector('.pod-user-label')) {
+        console.log('Found headline element:', headlineElement.textContent);
         addPodUserLabel(headlineElement, 'profile');
+        break;
       }
     }
   }
@@ -56,15 +86,15 @@ function processPodUsers() {
     '.feed-shared-update-v2',
     '.update-components-actor',
     '.search-results__list-item',
-    '.ember-view[data-test-search-result]' // Additional search result selector
+    '.ember-view[data-test-search-result]'
   ].join(','));
 
   items.forEach(item => {
     const linkElement = item.querySelector('a[href*="/in/"]');
     if (!linkElement) return;
 
-    const profileUrl = linkElement.href.split('?')[0].toLowerCase();
-    if (!isPodUser(profileUrl)) return;
+    const itemUrl = linkElement.href;
+    if (!isPodUser(itemUrl)) return;
 
     // First try to find the headline element
     const headlineElement = item.querySelector([
@@ -94,14 +124,17 @@ function processPodUsers() {
 function isPodUser(url) {
   if (!url || !podUsers.length) return false;
 
-  const cleanUrl = url.toLowerCase()
-    .split('?')[0]
-    .split('#')[0]
-    .replace(/\/$/, '');
+  const cleanUrl = normalizeProfileUrl(url);
 
   return podUsers.some(podUrl => {
-    const cleanPodUrl = podUrl.toLowerCase().trim().replace(/\/$/, '');
-    return cleanUrl.includes(cleanPodUrl);
+    const cleanPodUrl = normalizeProfileUrl(podUrl);
+    const match = cleanUrl.includes(cleanPodUrl);
+    console.log('Comparing URLs:', {
+      cleanUrl,
+      cleanPodUrl,
+      match
+    });
+    return match;
   });
 }
 

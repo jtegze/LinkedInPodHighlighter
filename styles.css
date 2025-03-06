@@ -30,7 +30,8 @@
 .text-body-medium.break-words,
 .update-components-actor__description,
 .ember-view .t-bold,
-.ember-view .text-body-medium {
+.ember-view .text-body-medium,
+div[data-generated-suggestion-target] .text-body-medium {
   display: inline-flex !important;
   align-items: center !important;
   flex-wrap: wrap !important;
@@ -49,4 +50,9 @@
 .pod-user-label::before,
 .pod-user-label::after {
   display: none !important;
+}
+
+/* Profile page specific adjustments */
+.text-body-medium.break-words {
+  padding-right: 8px !important;
 }
